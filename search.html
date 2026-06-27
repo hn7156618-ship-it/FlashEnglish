@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FlashEng — Tra Cứu Từ</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#4F6EF7;--primary-dark:#3A56D4;
+  --accent:#FF6B6B;--accent2:#FFD93D;--accent3:#6BCB77;
+  --bg:#F0F4FF;--bg2:#fff;
+  --text:#1A1A2E;--text2:#5A5A7A;
+  --shadow:0 4px 20px rgba(79,110,247,.12);
+  --shadow-lg:0 8px 32px rgba(79,110,247,.18);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+
+/* HEADER */
+header{position:sticky;top:0;z-index:100;height:64px;background:#fff;box-shadow:0 2px 12px rgba(79,110,247,.10);display:flex;align-items:center;padding:0 32px;gap:32px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.logo-icon{width:38px;height:38px;background:var(--primary);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.logo-text{font-family:'Baloo 2',cursive;font-size:22px;font-weight:800;color:var(--primary);line-height:1}
+.logo-text span{color:var(--accent)}
+nav{display:flex;align-items:center;gap:4px;flex:1}
+nav a{text-decoration:none;color:var(--text2);font-weight:700;font-size:14px;padding:8px 14px;border-radius:8px;transition:all .2s;white-space:nowrap}
+nav a:hover,nav a.active{background:#EEF1FF;color:var(--primary)}
+.header-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:'Nunito',sans-serif;font-weight:700;font-size:14px;padding:9px 18px;border-radius:24px;border:none;cursor:pointer;text-decoration:none;transition:all .2s}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(79,110,247,.3)}
+.btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px)}
+.avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:15px;cursor:pointer}
+
+/* HERO SEARCH */
+.search-hero{background:linear-gradient(135deg,#4F6EF7,#7B5EA7);padding:48px 24px 40px;text-align:center}
+.search-hero h1{font-family:'Baloo 2',cursive;font-size:32px;font-weight:800;color:#fff;margin-bottom:8px}
+.search-hero p{color:rgba(255,255,255,.8);font-weight:600;font-size:15px;margin-bottom:28px}
+.search-big{display:flex;align-items:center;max-width:580px;margin:0 auto;background:#fff;border-radius:20px;padding:6px 6px 6px 20px;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.search-big input{flex:1;border:none;outline:none;font-family:'Nunito',sans-serif;font-size:18px;font-weight:700;color:var(--text);background:transparent;padding:8px 0}
+.search-big input::placeholder{color:#bbb;font-weight:600}
+.search-big button{background:var(--primary);color:#fff;border:none;border-radius:14px;padding:12px 24px;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.search-big button:hover{background:var(--primary-dark)}
+
+.recent-searches{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;flex-wrap:wrap}
+.recent-label{font-size:13px;color:rgba(255,255,255,.7);font-weight:600}
+.recent-tag{background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:16px;padding:4px 12px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
+.recent-tag:hover{background:rgba(255,255,255,.35)}
+
+/* MAIN */
+.main-wrap{max-width:900px;margin:0 auto;width:100%;padding:32px 24px 80px;flex:1}
+
+/* RESULT CARD */
+.result-card{background:#fff;border-radius:20px;box-shadow:var(--shadow-lg);overflow:hidden;margin-bottom:24px;display:none}
+.result-card.show{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+.result-header{background:linear-gradient(135deg,#EEF1FF,#F5F0FF);padding:28px 32px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.result-word-wrap{}
+.result-word{font-family:'Baloo 2',cursive;font-size:42px;font-weight:800;color:var(--text);line-height:1}
+.result-phonetic{font-size:18px;color:var(--text2);font-weight:600;margin-top:4px;letter-spacing:1px}
+.result-type{display:inline-block;background:#EEF1FF;color:var(--primary);font-size:12px;font-weight:800;padding:3px 10px;border-radius:8px;margin-top:8px;letter-spacing:.5px}
+.result-actions{display:flex;gap:8px;flex-shrink:0}
+.icon-btn{width:44px;height:44px;border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;transition:all .2s}
+.speak-btn{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(79,110,247,.3)}
+.speak-btn:hover{background:var(--primary-dark);transform:translateY(-1px)}
+.add-btn{background:#E8F9EE;color:#2D9F4E}
+.add-btn:hover{background:#6BCB77;color:#fff}
+.bm-btn{background:#FFF9E0;color:#E6A817}
+.bm-btn:hover{background:var(--accent2);color:var(--text)}
+
+.result-body{padding:24px 32px}
+.def-section{margin-bottom:20px}
+.def-pos{font-size:14px;font-weight:800;color:var(--primary);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.def-pos::after{content:'';flex:1;height:1px;background:#EEF1FF}
+.def-item{padding:10px 0;border-bottom:1px solid #F8F9FF;display:flex;gap:12px}
+.def-num{font-size:13px;font-weight:800;color:#ccc;min-width:20px;padding-top:1px}
+.def-text{}
+.def-meaning{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px}
+.def-example{font-size:13px;color:var(--text2);font-weight:600;font-style:italic;line-height:1.5}
+.def-example span{color:var(--accent);font-style:normal;font-weight:800}
+
+/* Synonyms */
+.syns-row{display:flex;gap:8px;flex-wrap:wrap;padding:12px 0}
+.syn-tag{background:#F0F4FF;color:var(--primary);border-radius:10px;padding:5px 12px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;border:2px solid transparent}
+.syn-tag:hover{border-color:var(--primary);background:#EEF1FF}
+
+/* INTERNAL RESULTS */
+.internal-section{margin-bottom:24px}
+.section-title{font-family:'Baloo 2',cursive;font-size:18px;font-weight:800;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section-title::before{content:'';width:4px;height:20px;background:var(--primary);border-radius:2px}
+
+.vocab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.vocab-mini{background:#fff;border-radius:12px;padding:14px 16px;box-shadow:0 2px 8px rgba(79,110,247,.08);border:2px solid transparent;transition:all .2s;cursor:pointer}
+.vocab-mini:hover{border-color:var(--primary);transform:translateY(-2px)}
+.vocab-mini-word{font-family:'Baloo 2',cursive;font-size:18px;font-weight:800;color:var(--primary)}
+.vocab-mini-phonetic{font-size:12px;color:#bbb;font-weight:600;margin-bottom:4px}
+.vocab-mini-meaning{font-size:13px;font-weight:700;color:var(--text)}
+.vocab-mini-topic{font-size:11px;font-weight:700;color:var(--text2);margin-top:6px;display:flex;align-items:center;gap:4px}
+
+/* LOADING */
+.loading{text-align:center;padding:40px;color:var(--text2)}
+.spinner{display:inline-block;width:32px;height:32px;border:3px solid #EEF1FF;border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* EMPTY */
+.no-result{text-align:center;padding:60px 24px;color:var(--text2)}
+.no-result .ni{font-size:56px;margin-bottom:12px}
+.no-result h3{font-family:'Baloo 2',cursive;font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px}
+.no-result p{font-weight:600;font-size:14px;line-height:1.6}
+
+/* Add-to-vocab modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(26,26,46,.5);backdrop-filter:blur(4px);z-index:500;align-items:center;justify-content:center;padding:24px}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:20px;padding:28px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:mIn .3s cubic-bezier(.34,1.56,.64,1)}
+@keyframes mIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-title{font-family:'Baloo 2',cursive;font-size:18px;font-weight:800;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between}
+.modal-close{background:#F0F4FF;border:none;cursor:pointer;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:16px}
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:5px}
+.form-input{width:100%;padding:10px 14px;border:2px solid #E0E5FF;border-radius:10px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;color:var(--text);outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--primary)}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235A5A7A' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;padding:12px 20px;border-radius:12px;font-weight:700;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);z-index:1000}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:var(--accent3)}
+
+@media(max-width:768px){
+  header{padding:0 16px;gap:12px}
+  nav a:not(.active){display:none}
+  .search-hero{padding:32px 16px 28px}
+  .search-hero h1{font-size:24px}
+  .result-header{flex-direction:column}
+  .result-body,.result-header{padding:20px}
+  .main-wrap{padding:20px 16px 60px}
+}
+</style>
+</head>
+<body>
+<script>
+if (!localStorage.getItem('fe_current_user')) { window.location.href = 'login.html'; }
+</script>
+
+<header>
+  <a href="index.html" class="logo">
+    <div class="logo-icon">🧠</div>
+    <div class="logo-text">Flash<span>Eng</span></div>
+  </a>
+  <nav>
+    <a href="index.html">🏠 Trang chủ</a>
+    <a href="index.html">📚 Chủ đề</a>
+    <a href="flashcard.html">🃏 Học ngay</a>
+    <a href="notes.html">📝 Ghi chú</a>
+  </nav>
+  <div class="header-right">
+    <a href="notes.html" class="btn btn-primary">📝 Ghi chú</a>
+    <div class="avatar">U</div>
+  </div>
+</header>
+
+<!-- HERO SEARCH -->
+<div class="search-hero">
+  <h1>🔍 Tra Cứu Từ Vựng</h1>
+  <p>Tìm kiếm trong bộ từ vựng của bạn hoặc tra cứu từ điển tiếng Anh</p>
+  <div class="search-big">
+    <input type="text" id="mainSearch" placeholder="Nhập từ tiếng Anh để tra cứu..." autocomplete="off"
+           onkeydown="if(event.key==='Enter') doSearch()"
+           oninput="onType()"/>
+    <button onclick="doSearch()">🔍 Tra cứu</button>
+  </div>
+  <div class="recent-searches" id="recentRow">
+    <span class="recent-label">Gần đây:</span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-wrap">
+
+  <!-- Dictionary result -->
+  <div id="dictResult"></div>
+
+  <!-- Internal results -->
+  <div id="internalResult"></div>
+
+  <!-- Default state -->
+  <div id="defaultState">
+    <div class="section-title" style="margin-bottom:16px">⭐ Từ đã thêm gần đây</div>
+    <div class="vocab-grid" id="recentWords"></div>
+  </div>
+
+</div>
+
+<!-- ADD TO VOCAB MODAL -->
+<div class="modal-overlay" id="addModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-title">
+      ➕ Thêm vào bộ từ vựng
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Từ tiếng Anh</label>
+      <input class="form-input" id="mWord" readonly/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nghĩa tiếng Việt *</label>
+      <input class="form-input" id="mMeaning" placeholder="Nhập nghĩa..."/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Phiên âm</label>
+      <input class="form-input" id="mPhonetic"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Câu ví dụ</label>
+      <input class="form-input" id="mExample" placeholder="Nhập câu ví dụ..."/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Chủ đề</label>
+      <select class="form-input form-select" id="mTopic">
+        <option value="0">-- Chọn chủ đề --</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px" onclick="confirmAdd()">
+      💾 Lưu vào bộ từ vựng
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// RECENT SEARCHES
+// ============================================================
+let recentSearches = JSON.parse(localStorage.getItem('fe_recent_searches') || '[]');
+
+function renderRecent() {
+  const row = document.getElementById('recentRow');
+  if (recentSearches.length === 0) { row.style.display = 'none'; return; }
+  row.style.display = 'flex';
+  const tags = recentSearches.slice(0,5).map(w =>
+    `<span class="recent-tag" onclick="searchWord('${w}')">${w}</span>`
+  ).join('');
+  row.innerHTML = `<span class="recent-label">Gần đây:</span>${tags}
+    <span class="recent-tag" style="background:rgba(255,255,255,.1)" onclick="clearRecent()">✕ Xóa</span>`;
+}
+
+function addRecent(word) {
+  recentSearches = [word, ...recentSearches.filter(w => w !== word)].slice(0,8);
+  localStorage.setItem('fe_recent_searches', JSON.stringify(recentSearches));
+  renderRecent();
+}
+function clearRecent() {
+  recentSearches = [];
+  localStorage.setItem('fe_recent_searches', '[]');
+  renderRecent();
+}
+
+// ============================================================
+// SEARCH
+// ============================================================
+function onType() {
+  const q = document.getElementById('mainSearch').value.trim();
+  if (q.length >= 2) searchInternal(q);
+  else {
+    document.getElementById('internalResult').innerHTML = '';
+    document.getElementById('dictResult').innerHTML = '';
+    document.getElementById('defaultState').style.display = 'block';
+  }
+}
+
+function doSearch() {
+  const q = document.getElementById('mainSearch').value.trim();
+  if (!q) return;
+  addRecent(q);
+  document.getElementById('defaultState').style.display = 'none';
+  searchInternal(q);
+  searchDictionary(q);
+}
+
+function searchWord(w) {
+  document.getElementById('mainSearch').value = w;
+  doSearch();
+}
+
+// ============================================================
+// INTERNAL SEARCH (localStorage words)
+// ============================================================
+function searchInternal(q) {
+  const words  = JSON.parse(localStorage.getItem('fe_words') || '[]');
+  const topics = JSON.parse(localStorage.getItem('fe_topics') || '[]');
+  const ql     = q.toLowerCase();
+  const found  = words.filter(w =>
+    w.word.toLowerCase().includes(ql) ||
+    w.meaning.toLowerCase().includes(ql)
+  );
+
+  const el = document.getElementById('internalResult');
+  if (found.length === 0) { el.innerHTML = ''; return; }
+
+  const topicMap = {};
+  topics.forEach(t => topicMap[t.id] = t.name);
+
+  el.innerHTML = `
+    <div class="internal-section">
+      <div class="section-title">📚 Trong bộ từ vựng của bạn (${found.length})</div>
+      <div class="vocab-grid">
+        ${found.map(w => `
+          <div class="vocab-mini" onclick="searchWord('${w.word}')">
+            <div class="vocab-mini-word">${w.word}</div>
+            <div class="vocab-mini-phonetic">${w.phonetic || ''}</div>
+            <div class="vocab-mini-meaning">${w.meaning}</div>
+            <div class="vocab-mini-topic">📁 ${topicMap[w.topicId] || 'Chưa phân loại'}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// DICTIONARY API (Free Dictionary API - hoàn toàn miễn phí)
+// ============================================================
+async function searchDictionary(word) {
+  const el = document.getElementById('dictResult');
+  el.innerHTML = `<div class="result-card show">
+    <div class="loading">
+      <div class="spinner"></div>
+      <p style="font-weight:700">Đang tra cứu từ điển...</p>
+    </div>
+  </div>`;
+
+  try {
+    const res  = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+    if (!res.ok) throw new Error('not found');
+    const data = await res.json();
+    renderDictResult(data[0], word);
+  } catch {
+    // Fallback: hiển thị kết quả nội bộ thôi
+    el.innerHTML = `<div class="result-card show">
+      <div class="no-result">
+        <div class="ni">🤔</div>
+        <h3>Không tìm thấy "${word}" trong từ điển</h3>
+        <p>Hãy kiểm tra lại chính tả, hoặc thêm từ này vào bộ từ vựng của bạn thủ công.</p>
+        <button class="btn btn-primary" style="margin-top:16px" onclick="openAddModal('${word}','')">
+          ➕ Thêm thủ công
+        </button>
+      </div>
+    </div>`;
+  }
+}
+
+// ============================================================
+// RENDER DICTIONARY RESULT
+// ============================================================
+function renderDictResult(data, rawWord) {
+  const el       = document.getElementById('dictResult');
+  const word     = data.word || rawWord;
+  const phonetic = data.phonetic ||
+    (data.phonetics && data.phonetics.find(p => p.text)?.text) || '';
+  const meanings = data.meanings || [];
+
+  let defsHtml = '';
+  meanings.forEach(m => {
+    const defs = m.definitions.slice(0, 3);
+    const syns = [...new Set((m.synonyms||[]).concat(defs.flatMap(d=>d.synonyms||[])))].slice(0,6);
+    defsHtml += `
+      <div class="def-section">
+        <div class="def-pos">${posLabel(m.partOfSpeech)}</div>
+        ${defs.map((d,i) => `
+          <div class="def-item">
+            <div class="def-num">${i+1}</div>
+            <div class="def-text">
+              <div class="def-meaning">${d.definition}</div>
+              ${d.example ? `<div class="def-example">"<span>${d.example}</span>"</div>` : ''}
+            </div>
+          </div>`).join('')}
+        ${syns.length ? `<div class="syns-row">
+          <span style="font-size:12px;font-weight:700;color:var(--text2);margin-right:4px">Từ đồng nghĩa:</span>
+          ${syns.map(s => `<span class="syn-tag" onclick="searchWord('${s}')">${s}</span>`).join('')}
+        </div>` : ''}
+      </div>`;
+  });
+
+  // First meaning for quick add
+  const firstMeaning = meanings[0]?.definitions[0]?.definition || '';
+
+  el.innerHTML = `
+    <div class="result-card show">
+      <div class="result-header">
+        <div class="result-word-wrap">
+          <div class="result-word">${word}</div>
+          ${phonetic ? `<div class="result-phonetic">${phonetic}</div>` : ''}
+          ${meanings[0] ? `<span class="result-type">${posLabel(meanings[0].partOfSpeech)}</span>` : ''}
+        </div>
+        <div class="result-actions">
+          <button class="icon-btn speak-btn" onclick="speak('${word}')" title="Phát âm">🔊</button>
+          <button class="icon-btn add-btn"   onclick="openAddModal('${word}','${phonetic.replace(/'/g,"\\'")}','${firstMeaning.replace(/'/g,"\\'").substring(0,60)}')" title="Thêm vào từ vựng">➕</button>
+        </div>
+      </div>
+      <div class="result-body">${defsHtml || '<p style="color:var(--text2);font-weight:600">Không có định nghĩa chi tiết.</p>'}</div>
+    </div>`;
+}
+
+function posLabel(pos) {
+  const map = {noun:'Danh từ 📦',verb:'Động từ ⚡',adjective:'Tính từ 🎨',adverb:'Trạng từ 🏃',pronoun:'Đại từ 👤',preposition:'Giới từ 📍',conjunction:'Liên từ 🔗',interjection:'Thán từ ❗'};
+  return map[pos] || pos;
+}
+
+// ============================================================
+// SPEAK
+// ============================================================
+function speak(word){ if(playWordAudio(arguments[0])) return; 
+  if (!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(word);
+  u.lang = 'en-US'; u.rate = 0.85;
+  speechSynthesis.speak(u);
+}
+
+// ============================================================
+// ADD TO VOCAB MODAL
+// ============================================================
+const TOPICS_DEFAULT = [
+  {id:1,name:'Community Service'},{id:2,name:'Country & City Life'},{id:3,name:'Crime & Punishment'},
+  {id:4,name:'Culture'},{id:5,name:'Customs & Traditions'},{id:6,name:'Education'},
+  {id:7,name:'Family'},{id:8,name:'Film & Entertainment'},{id:9,name:'Food & Cooking'},
+  {id:10,name:'Health & Medicine'},{id:11,name:'Technology'},{id:12,name:'Travel & Tourism'},
+];
+
+function openAddModal(word, phonetic = '', meaning = '') {
+  const topics = JSON.parse(localStorage.getItem('fe_topics') || JSON.stringify(TOPICS_DEFAULT));
+  document.getElementById('mWord').value     = word;
+  document.getElementById('mPhonetic').value = phonetic;
+  document.getElementById('mMeaning').value  = meaning;
+  document.getElementById('mExample').value  = '';
+  document.getElementById('mTopic').innerHTML = '<option value="0">-- Chọn chủ đề --</option>' +
+    topics.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+  document.getElementById('addModal').classList.add('open');
+}
+function closeModal() { document.getElementById('addModal').classList.remove('open'); }
+function confirmAdd() {
+  const word    = document.getElementById('mWord').value;
+  const meaning = document.getElementById('mMeaning').value.trim();
+  if (!meaning) { showToast('⚠️ Vui lòng nhập nghĩa!',''); return; }
+  const words = JSON.parse(localStorage.getItem('fe_words') || '[]');
+  words.push({
+    id: Date.now(),
+    word,
+    meaning,
+    phonetic:  document.getElementById('mPhonetic').value,
+    example:   document.getElementById('mExample').value,
+    topicId:   parseInt(document.getElementById('mTopic').value) || 0,
+    createdAt: new Date().toISOString(),
+    ease: 2.5, interval: 1, reps: 0
+  });
+  localStorage.setItem('fe_words', JSON.stringify(words));
+  closeModal();
+  showToast(`✅ Đã thêm "${word}" vào bộ từ vựng!`, 'success');
+  renderRecentWords();
+}
+
+// ============================================================
+// RECENT WORDS (default state)
+// ============================================================
+function renderRecentWords() {
+  const words  = JSON.parse(localStorage.getItem('fe_words') || '[]');
+  const topics = JSON.parse(localStorage.getItem('fe_topics') || '[]');
+  const topicMap = {};
+  topics.forEach(t => topicMap[t.id] = t.name);
+  const recent = [...words].reverse().slice(0, 8);
+  const el = document.getElementById('recentWords');
+  if (recent.length === 0) {
+    el.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">
+      <div style="font-size:40px;margin-bottom:12px">📭</div>
+      <p style="font-weight:700">Chưa có từ vựng nào. Thêm từ mới từ trang chủ!</p>
+    </div>`;
+    return;
+  }
+  el.innerHTML = recent.map(w => `
+    <div class="vocab-mini" onclick="searchWord('${w.word}')">
+      <div class="vocab-mini-word">${w.word}</div>
+      <div class="vocab-mini-phonetic">${w.phonetic || ''}</div>
+      <div class="vocab-mini-meaning">${w.meaning}</div>
+      <div class="vocab-mini-topic">📁 ${topicMap[w.topicId] || 'Chưa phân loại'}</div>
+    </div>`).join('');
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' '+type : '');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = 'toast', 2500);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderRecent();
+renderRecentWords();
+
+// Pre-fill from URL param
+const urlQ = new URLSearchParams(location.search).get('q');
+if (urlQ) {
+  document.getElementById('mainSearch').value = urlQ;
+  doSearch();
+}
+</script>
+
+<script src="audio_map.js"></script>
+<script>
+window.playWordAudio=function(word){
+ try{
+  const k=(word||'').toString().trim().toLowerCase();
+  if(window.AUDIO_MAP && AUDIO_MAP[k]){
+    const a=new Audio(AUDIO_MAP[k]); a.play(); return true;
+  }
+ }catch(e){}
+ return false;
+};
+</script>
+</body>
+</html>

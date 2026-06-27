@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FlashEng — Ghi Chú Cá Nhân</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#4F6EF7;--primary-dark:#3A56D4;
+  --accent:#FF6B6B;--accent2:#FFD93D;--accent3:#6BCB77;
+  --bg:#F0F4FF;--bg2:#fff;
+  --text:#1A1A2E;--text2:#5A5A7A;
+  --shadow:0 4px 20px rgba(79,110,247,.12);
+  --shadow-lg:0 8px 32px rgba(79,110,247,.18);
+  --r:14px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+
+/* HEADER */
+header{position:sticky;top:0;z-index:100;height:64px;background:#fff;box-shadow:0 2px 12px rgba(79,110,247,.10);display:flex;align-items:center;padding:0 32px;gap:32px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.logo-icon{width:38px;height:38px;background:var(--primary);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.logo-text{font-family:'Baloo 2',cursive;font-size:22px;font-weight:800;color:var(--primary);line-height:1}
+.logo-text span{color:var(--accent)}
+nav{display:flex;align-items:center;gap:4px;flex:1}
+nav a{text-decoration:none;color:var(--text2);font-weight:700;font-size:14px;padding:8px 14px;border-radius:8px;transition:all .2s;white-space:nowrap}
+nav a:hover,nav a.active{background:#EEF1FF;color:var(--primary)}
+.header-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:'Nunito',sans-serif;font-weight:700;font-size:14px;padding:9px 18px;border-radius:24px;border:none;cursor:pointer;text-decoration:none;transition:all .2s;white-space:nowrap}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(79,110,247,.3)}
+.btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px)}
+.avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:15px;cursor:pointer}
+
+/* LAYOUT */
+.page-wrap{max-width:1100px;margin:0 auto;width:100%;padding:32px 24px 80px;display:flex;gap:24px;flex:1}
+
+/* SIDEBAR LIST */
+.notes-sidebar{width:300px;flex-shrink:0;display:flex;flex-direction:column;gap:12px}
+.sidebar-header{display:flex;align-items:center;justify-content:space-between}
+.sidebar-title{font-family:'Baloo 2',cursive;font-size:18px;font-weight:800;color:var(--text)}
+.new-btn{display:flex;align-items:center;gap:6px;background:var(--primary);color:#fff;border:none;border-radius:12px;padding:8px 16px;font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s;box-shadow:0 4px 12px rgba(79,110,247,.3)}
+.new-btn:hover{background:var(--primary-dark);transform:translateY(-1px)}
+
+.search-notes{display:flex;align-items:center;background:#fff;border:2px solid transparent;border-radius:12px;padding:0 14px;gap:8px;transition:all .2s;box-shadow:var(--shadow)}
+.search-notes:focus-within{border-color:var(--primary)}
+.search-notes input{border:none;background:transparent;font-family:'Nunito',sans-serif;font-size:14px;color:var(--text);outline:none;width:100%;padding:10px 0}
+.search-notes input::placeholder{color:#bbb}
+
+.notes-list{display:flex;flex-direction:column;gap:8px;overflow-y:auto;max-height:calc(100vh - 220px)}
+.note-item{background:#fff;border-radius:12px;padding:14px 16px;cursor:pointer;border:2px solid transparent;transition:all .2s;box-shadow:0 2px 8px rgba(79,110,247,.06)}
+.note-item:hover{border-color:#DDE3FF;transform:translateX(2px)}
+.note-item.active{border-color:var(--primary);background:#F0F4FF}
+.note-item-title{font-weight:800;font-size:14px;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.note-item-preview{font-size:12px;color:var(--text2);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px}
+.note-item-meta{display:flex;align-items:center;justify-content:space-between}
+.note-item-date{font-size:11px;color:#bbb;font-weight:600}
+.note-tag{font-size:10px;font-weight:800;padding:2px 8px;border-radius:6px}
+.tag-blue  {background:#EEF1FF;color:var(--primary)}
+.tag-green {background:#E8F9EE;color:#2D9F4E}
+.tag-orange{background:#FFF3E0;color:#E65100}
+.tag-pink  {background:#FFE8F0;color:#C2185B}
+
+.empty-notes{text-align:center;padding:40px 20px;color:var(--text2)}
+.empty-notes .ei{font-size:48px;margin-bottom:12px}
+.empty-notes p{font-weight:700;font-size:14px}
+
+/* EDITOR */
+.notes-editor{flex:1;display:flex;flex-direction:column;gap:16px;min-width:0}
+.editor-card{background:#fff;border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;flex:1}
+
+.editor-toolbar{padding:12px 16px;border-bottom:2px solid #F0F4FF;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tool-btn{background:none;border:none;cursor:pointer;width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text2);transition:all .15s;font-weight:800}
+.tool-btn:hover{background:#EEF1FF;color:var(--primary)}
+.tool-sep{width:1px;height:20px;background:#EEF1FF;margin:0 4px}
+.color-dot{width:18px;height:18px;border-radius:50%;border:none;cursor:pointer;transition:transform .2s}
+.color-dot:hover{transform:scale(1.3)}
+
+.editor-title-wrap{padding:20px 24px 0}
+.editor-title{width:100%;border:none;outline:none;font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;color:var(--text);background:transparent;resize:none}
+.editor-title::placeholder{color:#ccc}
+
+.editor-meta-row{padding:4px 24px 12px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #F0F4FF}
+.editor-date{font-size:12px;color:#bbb;font-weight:600}
+.tag-select{border:none;background:#EEF1FF;color:var(--primary);font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;padding:4px 10px;border-radius:8px;cursor:pointer;outline:none}
+
+.editor-body{flex:1;padding:16px 24px;overflow-y:auto;min-height:300px;outline:none;font-size:15px;font-weight:600;line-height:1.8;color:var(--text)}
+.editor-body:empty::before{content:attr(data-placeholder);color:#ccc;pointer-events:none}
+.editor-body b{font-weight:800}
+.editor-body i{font-style:italic;color:var(--primary)}
+.editor-body u{text-decoration:underline;text-decoration-color:var(--accent)}
+.editor-body h3{font-family:'Baloo 2',cursive;color:var(--primary);margin:12px 0 6px}
+.editor-body ul{padding-left:20px;margin:8px 0}
+.editor-body li{margin-bottom:4px}
+.editor-body mark{background:var(--accent2);padding:0 3px;border-radius:3px}
+.editor-body blockquote{border-left:3px solid var(--primary);padding-left:16px;color:var(--text2);margin:12px 0;font-style:italic}
+
+.editor-footer{padding:12px 24px;border-top:2px solid #F0F4FF;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.word-count{font-size:12px;color:#bbb;font-weight:600}
+.editor-actions{display:flex;gap:8px}
+.save-btn{background:var(--primary);color:#fff;border:none;border-radius:10px;padding:9px 20px;font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(79,110,247,.3)}
+.save-btn:hover{background:var(--primary-dark);transform:translateY(-1px)}
+.del-btn{background:#FFE8E8;color:var(--accent);border:none;border-radius:10px;padding:9px 16px;font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;cursor:pointer;transition:all .2s}
+.del-btn:hover{background:var(--accent);color:#fff}
+
+/* WELCOME STATE */
+.editor-welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;padding:40px;gap:16px}
+.editor-welcome .wi{font-size:64px}
+.editor-welcome h3{font-family:'Baloo 2',cursive;font-size:22px;font-weight:800;color:var(--text)}
+.editor-welcome p{color:var(--text2);font-weight:600;font-size:14px;max-width:300px;line-height:1.6}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;padding:12px 20px;border-radius:12px;font-weight:700;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);z-index:1000}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:var(--accent3)}
+.toast.warn{background:var(--accent2);color:var(--text)}
+
+@media(max-width:768px){
+  .page-wrap{flex-direction:column;padding:16px}
+  .notes-sidebar{width:100%}
+  .notes-list{max-height:200px}
+  header{padding:0 16px;gap:12px}
+  nav a:not(.active){display:none}
+}
+</style>
+</head>
+<body>
+<script>
+if (!localStorage.getItem('fe_current_user')) { window.location.href = 'login.html'; }
+</script>
+
+<header>
+  <a href="index.html" class="logo">
+    <div class="logo-icon">🧠</div>
+    <div class="logo-text">Flash<span>Eng</span></div>
+  </a>
+  <nav>
+    <a href="index.html">🏠 Trang chủ</a>
+    <a href="index.html">📚 Chủ đề</a>
+    <a href="flashcard.html">🃏 Học ngay</a>
+    <a href="notes.html" class="active">📝 Ghi chú</a>
+  </nav>
+  <div class="header-right">
+    <a href="search.html" class="btn btn-primary">🔍 Tra cứu từ</a>
+    <div class="avatar">U</div>
+  </div>
+</header>
+
+<div class="page-wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="notes-sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">📝 Ghi chú</div>
+      <button class="new-btn" onclick="newNote()">＋ Tạo mới</button>
+    </div>
+
+    <div class="search-notes">
+      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#bbb" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" placeholder="Tìm ghi chú..." id="searchNotes" oninput="filterNotes()"/>
+    </div>
+
+    <div class="notes-list" id="notesList"></div>
+  </aside>
+
+  <!-- EDITOR -->
+  <div class="notes-editor">
+    <div class="editor-card" id="editorCard">
+
+      <!-- Welcome state -->
+      <div class="editor-welcome" id="editorWelcome">
+        <div class="wi">📓</div>
+        <h3>Sổ ghi chú của bạn</h3>
+        <p>Ghi lại những điều bạn học được, từ vựng yêu thích, hoặc bất cứ điều gì bạn muốn nhớ.</p>
+        <button class="new-btn" onclick="newNote()" style="margin-top:8px">＋ Tạo ghi chú đầu tiên</button>
+      </div>
+
+      <!-- Editor (hidden until note selected) -->
+      <div id="editorMain" style="display:none;flex-direction:column;flex:1">
+        <!-- Toolbar -->
+        <div class="editor-toolbar">
+          <button class="tool-btn" onclick="fmt('bold')"        title="Đậm (Ctrl+B)"><b>B</b></button>
+          <button class="tool-btn" onclick="fmt('italic')"      title="Nghiêng (Ctrl+I)"><i>I</i></button>
+          <button class="tool-btn" onclick="fmt('underline')"   title="Gạch chân"><u>U</u></button>
+          <div class="tool-sep"></div>
+          <button class="tool-btn" onclick="fmtBlock('h3')"     title="Tiêu đề">H</button>
+          <button class="tool-btn" onclick="fmt('insertUnorderedList')" title="Danh sách">≡</button>
+          <button class="tool-btn" onclick="fmtBlock('blockquote')" title="Trích dẫn">❝</button>
+          <button class="tool-btn" onclick="fmt('hiliteColor','#FFD93D')" title="Đánh dấu">🖊</button>
+          <div class="tool-sep"></div>
+          <div class="tool-btn" style="cursor:default;font-size:11px;font-weight:700;color:var(--text2)">Màu:</div>
+          <div class="color-dot" style="background:#4F6EF7" onclick="fmt('foreColor','#4F6EF7')" title="Xanh"></div>
+          <div class="color-dot" style="background:#FF6B6B" onclick="fmt('foreColor','#FF6B6B')" title="Đỏ"></div>
+          <div class="color-dot" style="background:#6BCB77" onclick="fmt('foreColor','#6BCB77')" title="Xanh lá"></div>
+          <div class="color-dot" style="background:#1A1A2E" onclick="fmt('foreColor','#1A1A2E')" title="Đen"></div>
+          <div class="tool-sep"></div>
+          <button class="tool-btn" onclick="fmt('undo')" title="Hoàn tác">↩</button>
+          <button class="tool-btn" onclick="fmt('redo')" title="Làm lại">↪</button>
+        </div>
+
+        <!-- Title -->
+        <div class="editor-title-wrap">
+          <textarea class="editor-title" id="noteTitle" rows="1" placeholder="Tiêu đề ghi chú..." oninput="autoResize(this);autoSave()"></textarea>
+        </div>
+
+        <!-- Meta -->
+        <div class="editor-meta-row">
+          <span class="editor-date" id="noteDate">Hôm nay</span>
+          <select class="tag-select" id="noteTag" onchange="autoSave()">
+            <option value="blue">📘 Từ vựng</option>
+            <option value="green">📗 Ngữ pháp</option>
+            <option value="orange">📙 Phát âm</option>
+            <option value="pink">📕 Khác</option>
+          </select>
+        </div>
+
+        <!-- Body -->
+        <div class="editor-body" id="noteBody" contenteditable="true"
+             data-placeholder="Bắt đầu ghi chú tại đây... ✍️"
+             oninput="updateWordCount();autoSave()"></div>
+
+        <!-- Footer -->
+        <div class="editor-footer">
+          <span class="word-count" id="wordCount">0 từ</span>
+          <div class="editor-actions">
+            <button class="del-btn" onclick="deleteNote()">🗑 Xóa</button>
+            <button class="save-btn" onclick="saveNote()">💾 Lưu ghi chú</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let notes       = JSON.parse(localStorage.getItem('fe_notes') || '[]');
+let currentId   = null;
+let saveTimer   = null;
+
+const TAG_LABELS = {blue:'Từ vựng', green:'Ngữ pháp', orange:'Phát âm', pink:'Khác'};
+
+// ============================================================
+// RENDER LIST
+// ============================================================
+function renderList(filter = '') {
+  const list = document.getElementById('notesList');
+  const q    = filter.toLowerCase();
+  const filtered = notes.filter(n =>
+    n.title.toLowerCase().includes(q) ||
+    stripHtml(n.body).toLowerCase().includes(q)
+  ).sort((a,b) => b.updatedAt - a.updatedAt);
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-notes">
+      <div class="ei">${filter ? '🔍' : '📭'}</div>
+      <p>${filter ? 'Không tìm thấy ghi chú nào' : 'Chưa có ghi chú nào'}</p>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(n => {
+    const active  = n.id === currentId ? 'active' : '';
+    const preview = stripHtml(n.body).substring(0, 60) || 'Ghi chú trống...';
+    const date    = formatDate(n.updatedAt);
+    return `<div class="note-item ${active}" onclick="openNote(${n.id})">
+      <div class="note-item-title">${n.title || 'Không có tiêu đề'}</div>
+      <div class="note-item-preview">${preview}</div>
+      <div class="note-item-meta">
+        <span class="note-item-date">${date}</span>
+        <span class="note-tag tag-${n.tag}">${TAG_LABELS[n.tag] || 'Khác'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// NEW NOTE
+// ============================================================
+function newNote() {
+  const id = Date.now();
+  const note = {
+    id, title: '', body: '', tag: 'blue',
+    createdAt: id, updatedAt: id
+  };
+  notes.unshift(note);
+  persist();
+  openNote(id);
+}
+
+// ============================================================
+// OPEN NOTE
+// ============================================================
+function openNote(id) {
+  currentId = id;
+  const note = notes.find(n => n.id === id);
+  if (!note) return;
+
+  document.getElementById('editorWelcome').style.display   = 'none';
+  const em = document.getElementById('editorMain');
+  em.style.display = 'flex';
+
+  document.getElementById('noteTitle').value = note.title;
+  document.getElementById('noteBody').innerHTML = note.body;
+  document.getElementById('noteTag').value   = note.tag || 'blue';
+  document.getElementById('noteDate').textContent = 'Chỉnh sửa: ' + formatDate(note.updatedAt);
+  autoResize(document.getElementById('noteTitle'));
+  updateWordCount();
+  renderList(document.getElementById('searchNotes').value);
+}
+
+// ============================================================
+// SAVE
+// ============================================================
+function saveNote() {
+  if (!currentId) return;
+  const note = notes.find(n => n.id === currentId);
+  if (!note) return;
+  note.title     = document.getElementById('noteTitle').value.trim();
+  note.body      = document.getElementById('noteBody').innerHTML;
+  note.tag       = document.getElementById('noteTag').value;
+  note.updatedAt = Date.now();
+  document.getElementById('noteDate').textContent = 'Chỉnh sửa: ' + formatDate(note.updatedAt);
+  persist();
+  renderList(document.getElementById('searchNotes').value);
+  showToast('💾 Đã lưu ghi chú!', 'success');
+}
+
+function autoSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    if (!currentId) return;
+    const note = notes.find(n => n.id === currentId);
+    if (!note) return;
+    note.title     = document.getElementById('noteTitle').value.trim();
+    note.body      = document.getElementById('noteBody').innerHTML;
+    note.tag       = document.getElementById('noteTag').value;
+    note.updatedAt = Date.now();
+    persist();
+    renderList(document.getElementById('searchNotes').value);
+  }, 800);
+}
+
+// ============================================================
+// DELETE
+// ============================================================
+function deleteNote() {
+  if (!currentId) return;
+  if (!confirm('Xóa ghi chú này?')) return;
+  notes = notes.filter(n => n.id !== currentId);
+  persist();
+  currentId = null;
+  document.getElementById('editorWelcome').style.display = 'flex';
+  document.getElementById('editorMain').style.display    = 'none';
+  renderList();
+  showToast('🗑 Đã xóa ghi chú', '');
+}
+
+// ============================================================
+// FILTER
+// ============================================================
+function filterNotes() {
+  renderList(document.getElementById('searchNotes').value);
+}
+
+// ============================================================
+// FORMATTING
+// ============================================================
+function fmt(cmd, val = null) {
+  document.getElementById('noteBody').focus();
+  document.execCommand(cmd, false, val);
+  autoSave();
+}
+function fmtBlock(tag) {
+  document.getElementById('noteBody').focus();
+  document.execCommand('formatBlock', false, tag);
+  autoSave();
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function persist() { localStorage.setItem('fe_notes', JSON.stringify(notes)); }
+function stripHtml(html) { return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g,' ').trim(); }
+function updateWordCount() {
+  const text  = stripHtml(document.getElementById('noteBody').innerHTML);
+  const words = text.split(/\s+/).filter(Boolean).length;
+  document.getElementById('wordCount').textContent = words + ' từ';
+}
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+function formatDate(ts) {
+  const d = new Date(ts);
+  const now = new Date();
+  const diff = (now - d) / 1000;
+  if (diff < 60)    return 'Vừa xong';
+  if (diff < 3600)  return Math.floor(diff/60) + ' phút trước';
+  if (diff < 86400) return Math.floor(diff/3600) + ' giờ trước';
+  return d.toLocaleDateString('vi-VN');
+}
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' '+type : '');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = 'toast', 2500);
+}
+
+// Keyboard shortcut Ctrl+S
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveNote(); }
+});
+
+// INIT
+renderList();
+// Auto-open first note if exists
+if (notes.length > 0) openNote(notes[0].id);
+</script>
+
+<script src="audio_map.js"></script>
+<script>
+window.playWordAudio=function(word){
+ try{
+  const k=(word||'').toString().trim().toLowerCase();
+  if(window.AUDIO_MAP && AUDIO_MAP[k]){
+    const a=new Audio(AUDIO_MAP[k]); a.play(); return true;
+  }
+ }catch(e){}
+ return false;
+};
+</script>
+</body>
+</html>

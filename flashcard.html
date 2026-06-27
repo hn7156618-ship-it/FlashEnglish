@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FlashEng — Học Flashcard</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet"/>
+<style>
+/* ===== RESET & VARIABLES ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --primary:      #4F6EF7;
+  --primary-dark: #3A56D4;
+  --accent:       #FF6B6B;
+  --accent2:      #FFD93D;
+  --accent3:      #6BCB77;
+  --bg:           #F0F4FF;
+  --bg2:          #FFFFFF;
+  --text:         #1A1A2E;
+  --text2:        #5A5A7A;
+  --shadow:       0 4px 20px rgba(79,110,247,0.12);
+  --shadow-lg:    0 8px 32px rgba(79,110,247,0.18);
+  --header-h:     64px;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== HEADER ===== */
+header {
+  position: sticky; top: 0; z-index: 100;
+  height: var(--header-h);
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(79,110,247,0.10);
+  display: flex; align-items: center;
+  padding: 0 32px; gap: 32px;
+}
+.logo { display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0; }
+.logo-icon { width:38px;height:38px;background:var(--primary);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px; }
+.logo-text { font-family:'Baloo 2',cursive;font-size:22px;font-weight:800;color:var(--primary);line-height:1; }
+.logo-text span { color:var(--accent); }
+nav { display:flex;align-items:center;gap:4px;flex:1; }
+nav a { text-decoration:none;color:var(--text2);font-weight:700;font-size:14px;padding:8px 14px;border-radius:8px;transition:all .2s;white-space:nowrap; }
+nav a:hover, nav a.active { background:#EEF1FF;color:var(--primary); }
+.header-right { display:flex;align-items:center;gap:12px;flex-shrink:0; }
+.btn { display:inline-flex;align-items:center;gap:6px;font-family:'Nunito',sans-serif;font-weight:700;font-size:14px;padding:9px 18px;border-radius:24px;border:none;cursor:pointer;text-decoration:none;transition:all .2s;white-space:nowrap; }
+.btn-primary { background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(79,110,247,0.3); }
+.btn-primary:hover { background:var(--primary-dark);transform:translateY(-1px); }
+.avatar { width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:15px;cursor:pointer;border:2px solid #fff;box-shadow:0 2px 8px rgba(79,110,247,0.3); }
+
+/* ===== BREADCRUMB ===== */
+.breadcrumb {
+  background: #fff;
+  padding: 12px 32px;
+  border-bottom: 1px solid #E8EDFF;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 600; color: var(--text2);
+}
+.breadcrumb a { color: var(--primary); text-decoration: none; }
+.breadcrumb a:hover { text-decoration: underline; }
+.breadcrumb span { color: #ccc; }
+
+/* ===== LAYOUT ===== */
+.study-layout {
+  display: flex;
+  flex: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 32px 24px;
+  gap: 28px;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.progress-box {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+.progress-label {
+  font-size: 13px; font-weight: 700; color: var(--text2);
+  margin-bottom: 10px;
+}
+.progress-label strong { color: var(--primary); font-size: 15px; }
+.progress-track {
+  height: 10px; background: #EEF1FF;
+  border-radius: 6px; overflow: hidden; margin-bottom: 6px;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  border-radius: 6px;
+  transition: width .6s ease;
+}
+.progress-pct {
+  text-align: right; font-size: 12px;
+  font-weight: 800; color: var(--primary);
+}
+
+.parts-list { display: flex; flex-direction: column; gap: 6px; }
+.part-item {
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 14px; font-weight: 700;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all .2s;
+  border: 2px solid transparent;
+  background: #fff;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.part-item:hover { background: #EEF1FF; color: var(--primary); }
+.part-item.active {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(79,110,247,0.3);
+}
+.part-item .part-count {
+  font-size: 11px; font-weight: 600;
+  opacity: .7;
+}
+.part-item.done .part-icon { color: var(--accent3); }
+.part-item.active .part-count { opacity: .8; color: #fff; }
+
+/* ===== MAIN STUDY AREA ===== */
+.study-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+/* Topic header */
+.topic-header {
+  background: linear-gradient(135deg, #4F6EF7, #7B5EA7);
+  border-radius: 16px;
+  padding: 20px 24px;
+  display: flex; align-items: center; gap: 16px;
+  color: #fff;
+  box-shadow: var(--shadow-lg);
+}
+.topic-header-emoji { font-size: 36px; }
+.topic-header-info h2 {
+  font-family: 'Baloo 2', cursive;
+  font-size: 18px; font-weight: 800;
+  line-height: 1.2;
+}
+.topic-header-info p {
+  font-size: 13px; opacity: .8; font-weight: 600; margin-top: 2px;
+}
+
+/* ===== FLASHCARD ===== */
+.card-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* 3D flip container */
+.flashcard-wrapper {
+  perspective: 1200px;
+  width: 100%;
+  max-width: 560px;
+  height: 320px;
+  cursor: pointer;
+  user-select: none;
+}
+.flashcard-inner {
+  position: relative;
+  width: 100%; height: 100%;
+  transform-style: preserve-3d;
+  transition: transform .55s cubic-bezier(.4,0,.2,1);
+}
+.flashcard-wrapper.flipped .flashcard-inner {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute; inset: 0;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 8px 40px rgba(79,110,247,0.15);
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.card-back-face {
+  transform: rotateY(180deg);
+}
+
+/* Card front */
+.card-front-img {
+  height: 180px;
+  background: linear-gradient(135deg, #E3F0FF 0%, #D5E8FF 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 80px;
+  position: relative;
+  overflow: hidden;
+}
+.card-front-img::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 30% 70%, rgba(79,110,247,.08), transparent 60%);
+}
+.card-topic-label {
+  position: absolute; top: 12px; left: 12px;
+  background: rgba(79,110,247,.15);
+  color: var(--primary);
+  font-size: 11px; font-weight: 800;
+  padding: 4px 10px; border-radius: 6px;
+  letter-spacing: .5px;
+}
+.card-front-body {
+  flex: 1;
+  padding: 18px 24px;
+  display: flex; flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+.card-meaning {
+  font-size: 20px; font-weight: 800; color: var(--text);
+  line-height: 1.3;
+}
+.card-example {
+  font-size: 13px; color: var(--text2); font-weight: 600;
+  line-height: 1.5;
+}
+.card-example em { color: var(--accent); font-style: normal; font-weight: 800; }
+.card-hint {
+  text-align: center; font-size: 12px; color: #bbb;
+  font-weight: 600; margin-top: 4px;
+}
+
+/* Card back */
+.card-back-face .card-back-body {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 32px 24px;
+  gap: 10px;
+}
+.card-word {
+  font-family: 'Baloo 2', cursive;
+  font-size: 42px; font-weight: 800;
+  color: var(--primary);
+  line-height: 1;
+}
+.card-phonetic {
+  font-size: 18px; color: var(--text2); font-weight: 600;
+  letter-spacing: 1px;
+}
+.card-audio-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: #EEF1FF; border: none; cursor: pointer;
+  border-radius: 24px; padding: 8px 18px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700; font-size: 13px;
+  color: var(--primary);
+  transition: all .2s;
+}
+.card-audio-btn:hover { background: var(--primary); color: #fff; }
+.card-back-meaning {
+  font-size: 16px; font-weight: 700; color: var(--text);
+  text-align: center;
+}
+.card-back-example {
+  font-size: 13px; color: var(--text2); font-weight: 600;
+  text-align: center; line-height: 1.6;
+  background: #F8F9FF; border-radius: 10px;
+  padding: 10px 16px; width: 100%;
+}
+.card-back-example em { color: var(--accent); font-style: normal; font-weight: 800; }
+
+/* ===== CARD CONTROLS ===== */
+.card-controls {
+  width: 100%; max-width: 560px;
+}
+
+/* Navigation dots */
+.card-nav {
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; margin-bottom: 16px;
+}
+.dot {
+  width: 8px; height: 8px;
+  border-radius: 50%; background: #DDE3FF;
+  transition: all .2s; cursor: pointer;
+}
+.dot.active { background: var(--primary); width: 24px; border-radius: 4px; }
+.dot.done   { background: var(--accent3); }
+
+/* Action buttons row */
+.action-row {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bookmark-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: none; border: none; cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px; font-weight: 700; color: var(--text2);
+  padding: 8px 10px; border-radius: 10px;
+  transition: all .2s; white-space: nowrap;
+}
+.bookmark-btn:hover { background: #FFF9E0; color: var(--accent2); }
+.bookmark-btn.bookmarked { color: var(--accent2); }
+.bookmark-btn .star { font-size: 16px; }
+
+.divider { width: 1px; height: 32px; background: #EEF1FF; flex-shrink: 0; }
+
+.score-btn {
+  flex: 1;
+  min-width: 90px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  border: none; border-radius: 12px; cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px; font-weight: 800;
+  padding: 10px 8px;
+  transition: all .2s;
+}
+.score-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+.btn-known   { background: #E8F9EE; color: #2D9F4E; }
+.btn-known:hover   { background: #6BCB77; color: #fff; }
+.btn-unknown { background: #FFE8E8; color: #E05050; }
+.btn-unknown:hover { background: #FF6B6B; color: #fff; }
+.btn-flip {
+  background: var(--primary); color: #fff;
+  border-radius: 12px; border: none; cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800; font-size: 13px;
+  padding: 10px 20px;
+  display: flex; align-items: center; gap: 6px;
+  transition: all .2s;
+  box-shadow: 0 4px 12px rgba(79,110,247,0.3);
+}
+.btn-flip:hover { background: var(--primary-dark); transform: translateY(-1px); }
+
+.flag-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: #F8F9FF; border: none; cursor: pointer;
+  border-radius: 10px; padding: 10px 14px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px; font-weight: 700; color: var(--text2);
+  transition: all .2s;
+}
+.flag-btn:hover { background: #EEF1FF; color: var(--primary); }
+
+/* Card counter */
+.card-counter {
+  text-align: center;
+  font-size: 13px; font-weight: 700; color: var(--text2);
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  margin-top: 8px;
+}
+.prev-btn, .next-btn {
+  background: #fff; border: 2px solid #E0E5FF;
+  border-radius: 50%; width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px;
+  transition: all .2s; color: var(--primary);
+}
+.prev-btn:hover, .next-btn:hover {
+  background: var(--primary); color: #fff; border-color: var(--primary);
+}
+.prev-btn:disabled, .next-btn:disabled { opacity: .3; cursor: not-allowed; }
+
+/* ===== RESULT SCREEN ===== */
+.result-screen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 40px 24px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+.result-screen.show { display: flex; }
+.result-emoji { font-size: 64px; }
+.result-title {
+  font-family: 'Baloo 2', cursive;
+  font-size: 28px; font-weight: 800; color: var(--text);
+}
+.result-stats {
+  display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;
+}
+.result-stat {
+  background: var(--bg);
+  border-radius: 12px; padding: 16px 24px;
+  text-align: center;
+}
+.result-stat .num {
+  font-family: 'Baloo 2', cursive;
+  font-size: 28px; font-weight: 800;
+}
+.result-stat .lbl { font-size: 12px; font-weight: 700; color: var(--text2); margin-top: 2px; }
+.num-green { color: var(--accent3); }
+.num-red   { color: var(--accent); }
+.num-blue  { color: var(--primary); }
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--text); color: #fff;
+  padding: 12px 20px; border-radius: 12px;
+  font-weight: 700; font-size: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  transform: translateY(80px); opacity: 0;
+  transition: all .3s cubic-bezier(.34,1.56,.64,1);
+  z-index: 1000;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { background: var(--accent3); }
+.toast.warn    { background: var(--accent2); color: var(--text); }
+
+/* ===== KEYBOARD HINT ===== */
+.kb-hint {
+  display: flex; gap: 12px; justify-content: center;
+  flex-wrap: wrap;
+}
+.kb-key {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #fff; border: 2px solid #E0E5FF;
+  border-radius: 8px; padding: 5px 10px;
+  font-size: 12px; font-weight: 700; color: var(--text2);
+}
+.kb-key span {
+  background: #EEF1FF; color: var(--primary);
+  border-radius: 4px; padding: 1px 6px; font-weight: 800;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .study-layout { flex-direction: column; padding: 16px; gap: 16px; }
+  .sidebar { width: 100%; }
+  .parts-list { flex-direction: row; flex-wrap: wrap; }
+  .part-item { flex: 1; min-width: 80px; text-align: center; justify-content: center; }
+  .flashcard-wrapper { height: 280px; }
+  header { padding: 0 16px; gap: 12px; }
+  nav a:not(.active) { display: none; }
+}
+</style>
+</head>
+<body>
+<script>
+if (!localStorage.getItem('fe_current_user')) { window.location.href = 'login.html'; }
+</script>
+
+<!-- HEADER -->
+<header>
+  <a href="index.html" class="logo">
+    <div class="logo-icon">🧠</div>
+    <div class="logo-text">Flash<span>Eng</span></div>
+  </a>
+  <nav>
+    <a href="index.html">🏠 Trang chủ</a>
+    <a href="index.html">📚 Chủ đề</a>
+    <a href="flashcard.html" class="active">🃏 Học ngay</a>
+    <a href="notes.html">📝 Ghi chú</a>
+  </nav>
+  <div class="header-right">
+    <button class="btn btn-primary" onclick="window.location.href='index.html'">
+      ➕ Thêm từ mới
+    </button>
+    <div class="avatar">U</div>
+  </div>
+</header>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <a href="index.html">🏠 Trang chủ</a>
+  <span>›</span>
+  <a href="index.html">Thư viện Flashcard</a>
+  <span>›</span>
+  <span id="breadTopic">Đang tải...</span>
+</div>
+
+<!-- LAYOUT -->
+<div class="study-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <!-- Progress -->
+    <div class="progress-box">
+      <div class="progress-label">Hoàn thành: <strong id="doneCount">0</strong>/<strong id="totalCount">0</strong> thẻ</div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div class="progress-pct" id="progressPct">0%</div>
+    </div>
+
+    <!-- Parts -->
+    <div class="parts-list" id="partsList"></div>
+
+    <!-- Stats mini -->
+    <div class="progress-box" style="display:flex;gap:12px;justify-content:space-between;">
+      <div style="text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--accent3)" id="knownCount">0</div>
+        <div style="font-size:11px;font-weight:700;color:var(--text2)">Đã thuộc</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--accent)" id="unknownCount">0</div>
+        <div style="font-size:11px;font-weight:700;color:var(--text2)">Chưa thuộc</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--accent2)" id="bookmarkCount">0</div>
+        <div style="font-size:11px;font-weight:700;color:var(--text2)">Bookmark</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN STUDY -->
+  <div class="study-main">
+
+    <!-- Topic header -->
+    <div class="topic-header">
+      <div class="topic-header-emoji" id="topicEmoji">📚</div>
+      <div class="topic-header-info">
+        <h2 id="topicTitle">Đang tải chủ đề...</h2>
+        <p id="topicDesc">FlashEng — Học từ vựng hiệu quả</p>
+      </div>
+    </div>
+
+    <!-- Flashcard -->
+    <div class="card-area" id="cardArea">
+
+      <div class="flashcard-wrapper" id="flashcard" onclick="flipCard()">
+        <div class="flashcard-inner" id="cardInner">
+
+          <!-- FRONT: hiện nghĩa tiếng Việt, đoán từ tiếng Anh -->
+          <div class="card-face card-front-face">
+            <div class="card-front-img" id="cardImg">
+              <span class="card-topic-label" id="cardTopicLabel">TOPIC 1</span>
+              <span id="cardEmoji">🌟</span>
+            </div>
+            <div class="card-front-body">
+              <div class="card-meaning" id="cardMeaning">Nhấn để bắt đầu...</div>
+              <div class="card-example" id="cardExampleFront"></div>
+              <div class="card-hint">👆 Nhấn vào thẻ để lật xem từ tiếng Anh</div>
+            </div>
+          </div>
+
+          <!-- BACK: hiện từ tiếng Anh -->
+          <div class="card-face card-back-face">
+            <div class="card-back-body">
+              <div class="card-word" id="cardWord">—</div>
+              <div class="card-phonetic" id="cardPhonetic"></div>
+              <button class="card-audio-btn" id="audioBtn" onclick="event.stopPropagation(); speakWord()">
+                🔊 Phát âm
+              </button>
+              <div class="card-back-meaning" id="cardBackMeaning"></div>
+              <div class="card-back-example" id="cardBackExample"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Navigation dots -->
+      <div class="card-nav" id="cardDots"></div>
+
+      <!-- Action row -->
+      <div class="action-row" id="actionRow">
+        <button class="bookmark-btn" id="bookmarkBtn" onclick="toggleBookmark()">
+          <span class="star">⭐</span> Bookmark
+        </button>
+        <div class="divider"></div>
+        <button class="score-btn btn-unknown" onclick="markCard(false)">
+          😞 Chưa thuộc
+        </button>
+        <button class="btn-flip" onclick="flipCard()">
+          🔄 Lật thẻ
+        </button>
+        <button class="score-btn btn-known" onclick="markCard(true)">
+          😊 Đã thuộc
+        </button>
+        <div class="divider"></div>
+        <button class="flag-btn" onclick="showMore()">••• </button>
+      </div>
+
+      <!-- Counter + prev/next -->
+      <div class="card-counter">
+        <button class="prev-btn" id="prevBtn" onclick="navigate(-1)">‹</button>
+        <span id="counterText">Card 1 of 1</span>
+        <button class="next-btn" id="nextBtn" onclick="navigate(1)">›</button>
+      </div>
+
+      <!-- Keyboard hints -->
+      <div class="kb-hint">
+        <div class="kb-key"><span>Space</span> Lật thẻ</div>
+        <div class="kb-key"><span>←</span> Thẻ trước</div>
+        <div class="kb-key"><span>→</span> Thẻ sau</div>
+        <div class="kb-key"><span>K</span> Đã thuộc</div>
+        <div class="kb-key"><span>U</span> Chưa thuộc</div>
+      </div>
+
+    </div>
+
+    <!-- Result screen (hidden until done) -->
+    <div class="result-screen" id="resultScreen">
+      <div class="result-emoji">🎉</div>
+      <div class="result-title">Hoàn thành phần học!</div>
+      <p style="color:var(--text2);font-weight:600;">Bạn đã xem qua tất cả thẻ trong phần này</p>
+      <div class="result-stats">
+        <div class="result-stat">
+          <div class="num num-green" id="resKnown">0</div>
+          <div class="lbl">Đã thuộc ✅</div>
+        </div>
+        <div class="result-stat">
+          <div class="num num-red" id="resUnknown">0</div>
+          <div class="lbl">Chưa thuộc ❌</div>
+        </div>
+        <div class="result-stat">
+          <div class="num num-blue" id="resTotal">0</div>
+          <div class="lbl">Tổng thẻ 📚</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+        <button class="btn btn-primary" onclick="restartPart()">🔄 Học lại</button>
+        <button class="btn" style="background:#E8F9EE;color:#2D9F4E;font-weight:700" onclick="nextPart()">▶ Phần tiếp theo</button>
+        <a href="index.html" class="btn" style="background:#F0F4FF;color:var(--primary);font-weight:700">🏠 Trang chủ</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// DATA: Từ vựng mẫu cho các chủ đề (5 từ/part × 4 parts)
+// ============================================================
+const SAMPLE_WORDS = {
+  1: [ // Community Service
+    {word:'volunteer',    phonetic:'/ˌvɒlənˈtɪər/',   meaning:'Tình nguyện viên', example:'She works as a <em>volunteer</em> at the local hospital.', emoji:'🤝'},
+    {word:'charity',      phonetic:'/ˈtʃærɪti/',       meaning:'Tổ chức từ thiện', example:'He donated money to a <em>charity</em> for children.', emoji:'❤️'},
+    {word:'community',    phonetic:'/kəˈmjuːnɪti/',    meaning:'Cộng đồng',        example:'The <em>community</em> worked together to clean the park.', emoji:'👥'},
+    {word:'donation',     phonetic:'/dəʊˈneɪʃən/',     meaning:'Sự quyên góp',    example:'Your <em>donation</em> will help many families.', emoji:'💝'},
+    {word:'fundraiser',   phonetic:'/ˈfʌndreɪzər/',    meaning:'Sự kiện gây quỹ', example:'We organized a <em>fundraiser</em> for the school.', emoji:'🎪'},
+  ],
+  2: [ // Country & City Life
+    {word:'urban',        phonetic:'/ˈɜːrbən/',         meaning:'Thuộc thành thị', example:'<em>Urban</em> areas have more job opportunities.', emoji:'🏙️'},
+    {word:'rural',        phonetic:'/ˈrʊərəl/',         meaning:'Thuộc nông thôn', example:'She grew up in a <em>rural</em> village.', emoji:'🌾'},
+    {word:'commute',      phonetic:'/kəˈmjuːt/',        meaning:'Di chuyển hàng ngày', example:'He <em>commutes</em> to work by train every day.', emoji:'🚆'},
+    {word:'rent',         phonetic:'/rent/',             meaning:'Tiền thuê nhà',   example:'The <em>rent</em> for the four-roomed house is affordable.', emoji:'🏠'},
+    {word:'infrastructure',phonetic:'/ˈɪnfrəstrʌktʃər/',meaning:'Cơ sở hạ tầng',  example:'The city needs better <em>infrastructure</em>.', emoji:'🏗️'},
+  ],
+  3: [ // Crime & Punishment
+    {word:'crime',       phonetic:'/kraɪm/',          meaning:'Tội phạm, tội ác', example:'<em>Crime</em> rates have decreased this year.', emoji:'🚨'},
+    {word:'punishment',  phonetic:'/ˈpʌnɪʃmənt/',     meaning:'Sự trừng phạt',   example:'The judge decided on a fair <em>punishment</em>.', emoji:'⚖️'},
+    {word:'witness',     phonetic:'/ˈwɪtnəs/',        meaning:'Người làm chứng', example:'The <em>witness</em> described what happened.', emoji:'👁️'},
+    {word:'theft',       phonetic:'/θeft/',            meaning:'Hành vi trộm cắp',example:'He was arrested for <em>theft</em>.', emoji:'🕵️'},
+    {word:'guilty',      phonetic:'/ˈɡɪlti/',          meaning:'Có tội',          example:'The jury found him <em>guilty</em>.', emoji:'🔒'},
+  ],
+  4: [ // Culture
+    {word:'heritage',    phonetic:'/ˈherɪtɪdʒ/',      meaning:'Di sản',          example:'This temple is part of our cultural <em>heritage</em>.', emoji:'🏛️'},
+    {word:'festival',    phonetic:'/ˈfestɪvəl/',      meaning:'Lễ hội',          example:'The <em>festival</em> takes place every spring.', emoji:'🎉'},
+    {word:'custom',      phonetic:'/ˈkʌstəm/',        meaning:'Phong tục',       example:'It is a <em>custom</em> to remove shoes before entering.', emoji:'👘'},
+    {word:'diverse',     phonetic:'/daɪˈvɜːrs/',      meaning:'Đa dạng',         example:'Vietnam has a <em>diverse</em> culture.', emoji:'🌏'},
+    {word:'identity',    phonetic:'/aɪˈdentəti/',     meaning:'Bản sắc',         example:'Language is part of national <em>identity</em>.', emoji:'🪪'},
+  ],
+  5: [ // Customs & Traditions
+    {word:'tradition',   phonetic:'/trəˈdɪʃən/',      meaning:'Truyền thống',    example:'This is an old family <em>tradition</em>.', emoji:'🎋'},
+    {word:'ceremony',    phonetic:'/ˈserəmoʊni/',     meaning:'Nghi lễ',         example:'The wedding <em>ceremony</em> was beautiful.', emoji:'💍'},
+    {word:'ancestor',    phonetic:'/ˈænsestər/',      meaning:'Tổ tiên',         example:'We worship our <em>ancestors</em> every year.', emoji:'🙏'},
+    {word:'lunar',       phonetic:'/ˈluːnər/',        meaning:'Thuộc về mặt trăng',example:'Tet is celebrated based on the <em>lunar</em> calendar.', emoji:'🌙'},
+    {word:'generation',  phonetic:'/ˌdʒenəˈreɪʃən/',  meaning:'Thế hệ',          example:'This custom passed down through <em>generations</em>.', emoji:'👴'},
+  ],
+  6: [ // Education
+    {word:'curriculum',  phonetic:'/kəˈrɪkjələm/',    meaning:'Chương trình học',example:'The school updated its <em>curriculum</em> this year.', emoji:'📘'},
+    {word:'scholarship', phonetic:'/ˈskɒlərʃɪp/',     meaning:'Học bổng',        example:'She received a <em>scholarship</em> to study abroad.', emoji:'🎓'},
+    {word:'tuition',     phonetic:'/tuːˈɪʃən/',       meaning:'Học phí',         example:'University <em>tuition</em> is increasing.', emoji:'💰'},
+    {word:'lecture',     phonetic:'/ˈlektʃər/',       meaning:'Bài giảng',       example:'The professor gave an interesting <em>lecture</em>.', emoji:'🎤'},
+    {word:'graduate',    phonetic:'/ˈɡrædʒuət/',      meaning:'Tốt nghiệp',      example:'He will <em>graduate</em> next year.', emoji:'🎓'},
+  ],
+  7: [ // Family
+    {word:'sibling',     phonetic:'/ˈsɪblɪŋ/',        meaning:'Anh chị em',      example:'I have two <em>siblings</em>.', emoji:'👫'},
+    {word:'relative',    phonetic:'/ˈrelətɪv/',       meaning:'Người thân',      example:'Many <em>relatives</em> came to the reunion.', emoji:'👵'},
+    {word:'household',   phonetic:'/ˈhaʊshoʊld/',     meaning:'Gia đình, hộ gia đình', example:'Every <em>household</em> has its own rules.', emoji:'🏠'},
+    {word:'upbringing',  phonetic:'/ˈʌpbrɪŋɪŋ/',      meaning:'Cách nuôi dạy',   example:'She had a strict <em>upbringing</em>.', emoji:'👶'},
+    {word:'bond',        phonetic:'/bɒnd/',           meaning:'Sự gắn kết',      example:'They share a strong family <em>bond</em>.', emoji:'❤️'},
+  ],
+  8: [ // Film & Entertainment
+    {word:'director',    phonetic:'/dəˈrektər/',      meaning:'Đạo diễn',        example:'The <em>director</em> won an award for this movie.', emoji:'🎬'},
+    {word:'plot',        phonetic:'/plɒt/',           meaning:'Cốt truyện',      example:'The <em>plot</em> was full of surprises.', emoji:'📜'},
+    {word:'character',   phonetic:'/ˈkærəktər/',      meaning:'Nhân vật',        example:'The main <em>character</em> is very brave.', emoji:'🦸'},
+    {word:'soundtrack',  phonetic:'/ˈsaʊndtræk/',     meaning:'Nhạc nền',        example:'The <em>soundtrack</em> made the scene more emotional.', emoji:'🎵'},
+    {word:'premiere',    phonetic:'/prɪˈmɪər/',       meaning:'Buổi công chiếu', example:'The <em>premiere</em> will be next Friday.', emoji:'🍿'},
+  ],
+  9: [ // Food & Cooking
+    {word:'ingredient',  phonetic:'/ɪnˈɡriːdiənt/',   meaning:'Nguyên liệu',     example:'Flour is the main <em>ingredient</em> in bread.', emoji:'🧂'},
+    {word:'recipe',      phonetic:'/ˈresəpi/',        meaning:'Công thức nấu ăn',example:'She followed the <em>recipe</em> step by step.', emoji:'📋'},
+    {word:'simmer',      phonetic:'/ˈsɪmər/',         meaning:'Đun nhỏ lửa',     example:'Let the soup <em>simmer</em> for 20 minutes.', emoji:'🍲'},
+    {word:'flavor',      phonetic:'/ˈfleɪvər/',       meaning:'Hương vị',        example:'This dish has a spicy <em>flavor</em>.', emoji:'🌶️'},
+    {word:'appetizer',   phonetic:'/ˈæpɪtaɪzər/',     meaning:'Món khai vị',     example:'We ordered an <em>appetizer</em> before the main course.', emoji:'🥗'},
+  ],
+  10: [ // Health & Medicine
+    {word:'symptom',     phonetic:'/ˈsɪmptəm/',       meaning:'Triệu chứng',     example:'A fever is a common <em>symptom</em> of flu.', emoji:'🤒'},
+    {word:'diagnosis',   phonetic:'/ˌdaɪəɡˈnoʊsɪs/',  meaning:'Chẩn đoán',       example:'The doctor confirmed the <em>diagnosis</em>.', emoji:'🩺'},
+    {word:'prescription',phonetic:'/prɪˈskrɪpʃən/',   meaning:'Đơn thuốc',       example:'He picked up his <em>prescription</em> at the pharmacy.', emoji:'💊'},
+    {word:'recover',     phonetic:'/rɪˈkʌvər/',       meaning:'Hồi phục',        example:'She is starting to <em>recover</em> from surgery.', emoji:'🏥'},
+    {word:'immune',      phonetic:'/ɪˈmjuːn/',        meaning:'Miễn dịch',       example:'Vitamin C boosts your <em>immune</em> system.', emoji:'🛡️'},
+  ],
+  11: [ // Technology
+    {word:'device',      phonetic:'/dɪˈvaɪs/',        meaning:'Thiết bị',        example:'This <em>device</em> can connect to Wi-Fi.', emoji:'📱'},
+    {word:'software',    phonetic:'/ˈsɒftwer/',       meaning:'Phần mềm',        example:'The company released new <em>software</em> last week.', emoji:'💻'},
+    {word:'upgrade',     phonetic:'/ʌpˈɡreɪd/',       meaning:'Nâng cấp',        example:'You should <em>upgrade</em> your phone’s storage.', emoji:'🔧'},
+    {word:'data',        phonetic:'/ˈdeɪtə/',         meaning:'Dữ liệu',         example:'The app stores <em>data</em> in the cloud.', emoji:'📊'},
+    {word:'artificial intelligence',phonetic:'/ˌɑːrtɪˈfɪʃəl ɪnˈtelɪdʒəns/',meaning:'Trí tuệ nhân tạo',example:'<em>Artificial intelligence</em> is changing many industries.', emoji:'🤖'},
+  ],
+  12: [ // Travel & Tourism
+    {word:'itinerary',   phonetic:'/aɪˈtɪnəreri/',    meaning:'Lịch trình',      example:'Our <em>itinerary</em> includes three cities.', emoji:'🗺️'},
+    {word:'accommodation',phonetic:'/əˌkɒməˈdeɪʃən/', meaning:'Nơi ở, lưu trú',  example:'We booked <em>accommodation</em> near the beach.', emoji:'🏨'},
+    {word:'destination', phonetic:'/ˌdestɪˈneɪʃən/',  meaning:'Điểm đến',        example:'Paris is a popular <em>destination</em> for tourists.', emoji:'📍'},
+    {word:'luggage',     phonetic:'/ˈlʌɡɪdʒ/',        meaning:'Hành lý',         example:'Please keep your <em>luggage</em> with you.', emoji:'🧳'},
+    {word:'sightseeing', phonetic:'/ˈsaɪtsiːɪŋ/',     meaning:'Tham quan',       example:'We spent the day <em>sightseeing</em> downtown.', emoji:'📸'},
+  ],
+  13: [ // Business & Work
+    {word:'colleague',   phonetic:'/ˈkɒliːɡ/',        meaning:'Đồng nghiệp',     example:'I discussed the plan with my <em>colleague</em>.', emoji:'🧑‍💼'},
+    {word:'deadline',    phonetic:'/ˈdedlaɪn/',       meaning:'Hạn chót',        example:'We have to finish the report before the <em>deadline</em>.', emoji:'⏰'},
+    {word:'negotiate',   phonetic:'/nɪˈɡoʊʃieɪt/',    meaning:'Đàm phán',        example:'They will <em>negotiate</em> the contract terms.', emoji:'🤝'},
+    {word:'revenue',     phonetic:'/ˈrevənuː/',       meaning:'Doanh thu',       example:'The company’s <em>revenue</em> grew by 20%.', emoji:'💹'},
+    {word:'promotion',   phonetic:'/prəˈmoʊʃən/',     meaning:'Sự thăng tiến',   example:'She got a <em>promotion</em> after two years.', emoji:'📈'},
+  ],
+  14: [ // Environment
+    {word:'pollution',   phonetic:'/pəˈluːʃən/',      meaning:'Sự ô nhiễm',      example:'Air <em>pollution</em> is a serious problem in big cities.', emoji:'🏭'},
+    {word:'recycle',     phonetic:'/riːˈsaɪkəl/',     meaning:'Tái chế',         example:'We should <em>recycle</em> plastic bottles.', emoji:'♻️'},
+    {word:'renewable',   phonetic:'/rɪˈnuːəbəl/',     meaning:'Có thể tái tạo',  example:'Solar power is a <em>renewable</em> energy source.', emoji:'☀️'},
+    {word:'deforestation',phonetic:'/diːˌfɒrɪˈsteɪʃən/',meaning:'Phá rừng',      example:'<em>Deforestation</em> harms wildlife habitats.', emoji:'🌳'},
+    {word:'sustainable', phonetic:'/səˈsteɪnəbəl/',   meaning:'Bền vững',        example:'We need <em>sustainable</em> farming methods.', emoji:'🌱'},
+  ],
+  15: [ // Sports & Fitness
+    {word:'athlete',     phonetic:'/ˈæθliːt/',        meaning:'Vận động viên',   example:'The <em>athlete</em> trains every morning.', emoji:'🏃'},
+    {word:'workout',     phonetic:'/ˈwɜːrkaʊt/',      meaning:'Buổi tập luyện',  example:'My <em>workout</em> includes running and stretching.', emoji:'💪'},
+    {word:'stamina',     phonetic:'/ˈstæmɪnə/',       meaning:'Sức bền',         example:'Long-distance runners need good <em>stamina</em>.', emoji:'🔋'},
+    {word:'tournament',  phonetic:'/ˈtʊrnəmənt/',     meaning:'Giải đấu',        example:'Our team won the <em>tournament</em>.', emoji:'🏆'},
+    {word:'injury',      phonetic:'/ˈɪndʒəri/',       meaning:'Chấn thương',     example:'He suffered an <em>injury</em> during the match.', emoji:'🤕'},
+  ],
+  16: [ // Music & Arts
+    {word:'melody',      phonetic:'/ˈmelədi/',        meaning:'Giai điệu',       example:'The song has a beautiful <em>melody</em>.', emoji:'🎶'},
+    {word:'instrument',  phonetic:'/ˈɪnstrəmənt/',    meaning:'Nhạc cụ',         example:'The guitar is her favorite <em>instrument</em>.', emoji:'🎸'},
+    {word:'exhibition',  phonetic:'/ˌeksɪˈbɪʃən/',    meaning:'Cuộc triển lãm',  example:'The art <em>exhibition</em> opens next week.', emoji:'🖼️'},
+    {word:'rhythm',      phonetic:'/ˈrɪðəm/',         meaning:'Nhịp điệu',       example:'Dancers must follow the <em>rhythm</em> of the music.', emoji:'🥁'},
+    {word:'masterpiece', phonetic:'/ˈmæstərpiːs/',    meaning:'Kiệt tác',        example:'This painting is considered a <em>masterpiece</em>.', emoji:'🎨'},
+  ],
+};
+
+// Fallback words nếu không có data cho topic
+const FALLBACK_WORDS = [
+  {word:'hello',      phonetic:'/həˈloʊ/',    meaning:'Xin chào',      example:'She said <em>hello</em> to everyone.', emoji:'👋'},
+  {word:'learn',      phonetic:'/lɜːrn/',     meaning:'Học, tìm hiểu', example:'I want to <em>learn</em> English every day.', emoji:'📖'},
+  {word:'study',      phonetic:'/ˈstʌdi/',    meaning:'Học tập',       example:'He <em>studies</em> hard for the exam.', emoji:'✏️'},
+  {word:'practice',   phonetic:'/ˈpræktɪs/', meaning:'Luyện tập',     example:'<em>Practice</em> makes perfect.', emoji:'💪'},
+  {word:'vocabulary', phonetic:'/vəˈkæbjʊleri/',meaning:'Từ vựng',   example:'Building <em>vocabulary</em> is important.', emoji:'📝'},
+  {word:'flashcard',  phonetic:'/ˈflæʃkɑːrd/',meaning:'Thẻ ghi nhớ', example:'I use <em>flashcards</em> to memorize words.', emoji:'🃏'},
+  {word:'memory',     phonetic:'/ˈmeməri/',   meaning:'Trí nhớ',      example:'Good <em>memory</em> helps you learn faster.', emoji:'🧠'},
+  {word:'review',     phonetic:'/rɪˈvjuː/',   meaning:'Ôn tập',       example:'I <em>review</em> my notes every evening.', emoji:'🔄'},
+];
+
+const TOPIC_INFO = {
+  1:  {name:'Community Service',    emoji:'🤝', desc:'Topic 1 — 24 từ vựng'},
+  2:  {name:'Country & City Life',  emoji:'🏙️', desc:'Topic 2 — 30 từ vựng'},
+  3:  {name:'Crime & Punishment',   emoji:'⚖️', desc:'Topic 3 — 18 từ vựng'},
+  4:  {name:'Culture',              emoji:'🎭', desc:'Topic 4 — 22 từ vựng'},
+  5:  {name:'Customs & Traditions', emoji:'🎋', desc:'Topic 5 — 20 từ vựng'},
+  6:  {name:'Education',            emoji:'📚', desc:'Topic 6 — 35 từ vựng'},
+  7:  {name:'Family',               emoji:'👨‍👩‍👧‍👦', desc:'Topic 7 — 28 từ vựng'},
+  8:  {name:'Film & Entertainment', emoji:'🎬', desc:'Topic 8 — 25 từ vựng'},
+  9:  {name:'Food & Cooking',       emoji:'🍳', desc:'Topic 9 — 32 từ vựng'},
+  10: {name:'Health & Medicine',    emoji:'🏥', desc:'Topic 10 — 40 từ vựng'},
+  11: {name:'Technology',           emoji:'💻', desc:'Topic 11 — 38 từ vựng'},
+  12: {name:'Travel & Tourism',     emoji:'✈️', desc:'Topic 12 — 30 từ vựng'},
+};
+
+// PART_SIZE: mỗi part chứa bao nhiêu thẻ
+const PART_SIZE = 5;
+
+// ============================================================
+// STATE
+// ============================================================
+let topicId      = 1;
+let allWords     = [];
+let parts        = [];
+let currentPart  = 0;
+let currentIdx   = 0;
+let isFlipped    = false;
+let scores       = {};    // word index -> true/false/null
+let bookmarks    = new Set();
+let partDone     = new Set();
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  // Lấy topicId từ URL hoặc localStorage
+  const params = new URLSearchParams(location.search);
+  topicId = parseInt(params.get('topic') || localStorage.getItem('fe_current_topic') || '1');
+
+  // Load words: ưu tiên user-added words từ localStorage
+  const savedWords = JSON.parse(localStorage.getItem('fe_words') || '[]');
+  const topicWords = savedWords.filter(w => w.topicId == topicId);
+
+  // Kết hợp với sample words
+  const sampleW = SAMPLE_WORDS[topicId] || FALLBACK_WORDS;
+  allWords = [...sampleW, ...topicWords.map(w => ({
+    word: w.word,
+    phonetic: w.phonetic || '',
+    meaning: w.meaning,
+    example: w.example ? w.example.replace(new RegExp(w.word, 'gi'), `<em>$&</em>`) : '',
+    emoji: '📝'
+  }))];
+
+  // Chia thành parts
+  parts = [];
+  for (let i = 0; i < allWords.length; i += PART_SIZE) {
+    parts.push(allWords.slice(i, i + PART_SIZE));
+  }
+
+  // Load scores từ localStorage
+  const savedScores = JSON.parse(localStorage.getItem(`fe_scores_${topicId}`) || '{}');
+  scores = savedScores;
+  const savedBookmarks = JSON.parse(localStorage.getItem(`fe_bookmarks_${topicId}`) || '[]');
+  bookmarks = new Set(savedBookmarks);
+
+  // Topic info
+  const info = TOPIC_INFO[topicId] || {name:'Flashcard', emoji:'📚', desc:'Học từ vựng'};
+  document.getElementById('topicTitle').textContent = `Topic ${topicId}: ${info.name}`;
+  document.getElementById('topicDesc').textContent  = info.desc;
+  document.getElementById('topicEmoji').textContent = info.emoji;
+  document.getElementById('breadTopic').textContent = `Topic ${topicId}: ${info.name}`;
+  document.title = `FlashEng — ${info.name}`;
+
+  renderSidebar();
+  loadPart(0);
+}
+
+// ============================================================
+// SIDEBAR
+// ============================================================
+function renderSidebar() {
+  const list = document.getElementById('partsList');
+  list.innerHTML = parts.map((p, i) => {
+    const done = partDone.has(i);
+    return `<div class="part-item ${i === currentPart ? 'active' : ''} ${done ? 'done' : ''}"
+                 onclick="loadPart(${i})">
+      <span>${done ? '✅' : '📖'} Part ${i+1}</span>
+      <span class="part-count">${p.length} từ</span>
+    </div>`;
+  }).join('');
+
+  updateStats();
+}
+
+function updateStats() {
+  const total   = allWords.length;
+  const known   = Object.values(scores).filter(Boolean).length;
+  const unknown = Object.values(scores).filter(v => v === false).length;
+  const bm      = bookmarks.size;
+
+  document.getElementById('doneCount').textContent = known;
+  document.getElementById('totalCount').textContent = total;
+  document.getElementById('progressFill').style.width = (total ? (known/total*100) : 0) + '%';
+  document.getElementById('progressPct').textContent  = (total ? Math.round(known/total*100) : 0) + '%';
+  document.getElementById('knownCount').textContent   = known;
+  document.getElementById('unknownCount').textContent = unknown;
+  document.getElementById('bookmarkCount').textContent= bm;
+}
+
+// ============================================================
+// LOAD PART
+// ============================================================
+function loadPart(partIdx) {
+  currentPart = partIdx;
+  currentIdx  = 0;
+  isFlipped   = false;
+
+  document.getElementById('cardArea').style.display   = 'flex';
+  document.getElementById('resultScreen').style.display = 'none';
+  document.getElementById('resultScreen').classList.remove('show');
+
+  renderSidebar();
+  renderDots();
+  renderCard();
+}
+
+// ============================================================
+// RENDER DOTS
+// ============================================================
+function renderDots() {
+  const part = parts[currentPart] || [];
+  document.getElementById('cardDots').innerHTML = part.map((_, i) => {
+    const globalIdx = currentPart * PART_SIZE + i;
+    const s = scores[globalIdx];
+    let cls = 'dot';
+    if (i === currentIdx) cls += ' active';
+    else if (s === true)  cls += ' done';
+    return `<div class="${cls}" onclick="jumpTo(${i})"></div>`;
+  }).join('');
+}
+
+function jumpTo(idx) {
+  currentIdx = idx;
+  isFlipped  = false;
+  document.getElementById('flashcard').classList.remove('flipped');
+  renderCard();
+  renderDots();
+}
+
+// ============================================================
+// RENDER CARD
+// ============================================================
+function renderCard() {
+  const part       = parts[currentPart] || [];
+  const card       = part[currentIdx];
+  const globalIdx  = currentPart * PART_SIZE + currentIdx;
+  if (!card) return;
+
+  // Reset flip
+  if (!isFlipped) document.getElementById('flashcard').classList.remove('flipped');
+
+  // Front
+  document.getElementById('cardEmoji').textContent         = card.emoji || '📝';
+  document.getElementById('cardMeaning').innerHTML         = card.meaning;
+  document.getElementById('cardExampleFront').innerHTML    = ''; // reveal on back
+  document.getElementById('cardTopicLabel').textContent    = `TOPIC ${topicId}`;
+
+  // Back
+  document.getElementById('cardWord').textContent          = card.word;
+  document.getElementById('cardPhonetic').textContent      = card.phonetic || '';
+  document.getElementById('cardBackMeaning').textContent   = card.meaning;
+  document.getElementById('cardBackExample').innerHTML     = card.example || '';
+
+  // Bookmark state
+  const bm = document.getElementById('bookmarkBtn');
+  if (bookmarks.has(globalIdx)) {
+    bm.classList.add('bookmarked');
+    bm.innerHTML = '<span class="star">⭐</span> Bookmarked';
+  } else {
+    bm.classList.remove('bookmarked');
+    bm.innerHTML = '<span class="star">⭐</span> Bookmark';
+  }
+
+  // Counter
+  document.getElementById('counterText').textContent = `Card ${currentIdx+1} of ${part.length}`;
+  document.getElementById('prevBtn').disabled = currentIdx === 0;
+  document.getElementById('nextBtn').disabled = currentIdx === part.length - 1;
+}
+
+// ============================================================
+// FLIP
+// ============================================================
+function flipCard() {
+  isFlipped = !isFlipped;
+  document.getElementById('flashcard').classList.toggle('flipped', isFlipped);
+  if (isFlipped) speakWord();
+}
+
+// ============================================================
+// SPEAK
+// ============================================================
+function speakWord(word){ if(playWordAudio(word)) return; 
+  const part = parts[currentPart] || [];
+  const card = part[currentIdx];
+  if (!card) return;
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(card.word);
+    u.lang = 'en-US'; u.rate = 0.85; u.pitch = 1.0;
+    window.speechSynthesis.speak(u);
+  }
+}
+
+// ============================================================
+// NAVIGATE
+// ============================================================
+function navigate(dir) {
+  const part = parts[currentPart] || [];
+  const newIdx = currentIdx + dir;
+  if (newIdx < 0 || newIdx >= part.length) return;
+  currentIdx = newIdx;
+  isFlipped  = false;
+  document.getElementById('flashcard').classList.remove('flipped');
+  renderCard();
+  renderDots();
+}
+
+// ============================================================
+// MARK CARD
+// ============================================================
+function markCard(known) {
+  const globalIdx = currentPart * PART_SIZE + currentIdx;
+  scores[globalIdx] = known;
+  localStorage.setItem(`fe_scores_${topicId}`, JSON.stringify(scores));
+  updateStats();
+  renderDots();
+
+  showToast(known ? '✅ Đã thuộc!' : '❌ Chưa thuộc — ôn thêm nhé!', known ? 'success' : '');
+
+  // Auto advance
+  const part = parts[currentPart] || [];
+  setTimeout(() => {
+    if (currentIdx < part.length - 1) {
+      navigate(1);
+    } else {
+      showResult();
+    }
+  }, 400);
+}
+
+// ============================================================
+// BOOKMARK
+// ============================================================
+function toggleBookmark() {
+  const globalIdx = currentPart * PART_SIZE + currentIdx;
+  if (bookmarks.has(globalIdx)) {
+    bookmarks.delete(globalIdx);
+    showToast('⭐ Đã bỏ bookmark', '');
+  } else {
+    bookmarks.add(globalIdx);
+    showToast('⭐ Đã thêm bookmark!', 'success');
+  }
+  localStorage.setItem(`fe_bookmarks_${topicId}`, JSON.stringify([...bookmarks]));
+  renderCard();
+  updateStats();
+}
+
+// ============================================================
+// MORE OPTIONS
+// ============================================================
+function showMore() {
+  const part = parts[currentPart] || [];
+  const card = part[currentIdx];
+  if (!card) return;
+  const msg = `Từ: ${card.word}\nNghĩa: ${card.meaning}\nPhiên âm: ${card.phonetic||'N/A'}\n\nBạn muốn:\n1. Thêm vào ghi chú\n2. Báo lỗi từ`;
+  alert(msg);
+}
+
+// ============================================================
+// RESULT SCREEN
+// ============================================================
+function showResult() {
+  partDone.add(currentPart);
+
+  const part = parts[currentPart] || [];
+  let known = 0, unknown = 0;
+  part.forEach((_, i) => {
+    const globalIdx = currentPart * PART_SIZE + i;
+    if (scores[globalIdx] === true)  known++;
+    if (scores[globalIdx] === false) unknown++;
+  });
+
+  document.getElementById('cardArea').style.display = 'none';
+  const rs = document.getElementById('resultScreen');
+  rs.style.display = 'flex';
+  rs.classList.add('show');
+
+  document.getElementById('resKnown').textContent   = known;
+  document.getElementById('resUnknown').textContent = unknown;
+  document.getElementById('resTotal').textContent   = part.length;
+
+  renderSidebar();
+}
+
+function restartPart() {
+  // Clear scores for this part
+  const part = parts[currentPart] || [];
+  part.forEach((_, i) => {
+    const globalIdx = currentPart * PART_SIZE + i;
+    delete scores[globalIdx];
+  });
+  localStorage.setItem(`fe_scores_${topicId}`, JSON.stringify(scores));
+  partDone.delete(currentPart);
+  loadPart(currentPart);
+}
+
+function nextPart() {
+  if (currentPart < parts.length - 1) {
+    loadPart(currentPart + 1);
+  } else {
+    showToast('🎉 Bạn đã hoàn thành tất cả các part!', 'success');
+    setTimeout(() => window.location.href = 'index.html', 1500);
+  }
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.className = 'toast', 2500);
+}
+
+// ============================================================
+// KEYBOARD
+// ============================================================
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.code === 'Space')       { e.preventDefault(); flipCard(); }
+  if (e.code === 'ArrowRight')  navigate(1);
+  if (e.code === 'ArrowLeft')   navigate(-1);
+  if (e.key  === 'k' || e.key === 'K') markCard(true);
+  if (e.key  === 'u' || e.key === 'U') markCard(false);
+  if (e.key  === 'b' || e.key === 'B') toggleBookmark();
+});
+
+// ============================================================
+// TOUCH SWIPE
+// ============================================================
+let touchStartX = 0;
+document.getElementById('flashcard').addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+});
+document.getElementById('flashcard').addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 60) {
+    if (dx < 0) navigate(1);
+    else        navigate(-1);
+  } else {
+    flipCard();
+  }
+});
+
+// START
+init();
+</script>
+
+<script src="audio_map.js"></script>
+<script>
+window.playWordAudio=function(word){
+ try{
+  const k=(word||'').toString().trim().toLowerCase();
+  if(window.AUDIO_MAP && AUDIO_MAP[k]){
+    const a=new Audio(AUDIO_MAP[k]); a.play(); return true;
+  }
+ }catch(e){}
+ return false;
+};
+</script>
+</body>
+</html>

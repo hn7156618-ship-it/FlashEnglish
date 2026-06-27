@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FlashEng — Đăng nhập</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#4F6EF7;--primary-dark:#3A56D4;
+  --accent:#FF6B6B;--accent2:#FFD93D;--accent3:#6BCB77;
+  --bg:#F0F4FF;--text:#1A1A2E;--text2:#5A5A7A;
+  --shadow-lg:0 8px 32px rgba(79,110,247,.18);
+}
+html,body{height:100%}
+body{
+  font-family:'Nunito',sans-serif;color:var(--text);
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;
+  background:linear-gradient(135deg,#4F6EF7 0%,#7B5EA7 50%,#FF6B6B 100%);
+  padding:24px; position:relative; overflow:hidden;
+}
+body::before{
+  content:'';position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.auth-box{
+  background:#fff;border-radius:24px;padding:40px 36px;
+  width:100%;max-width:420px;box-shadow:var(--shadow-lg);
+  position:relative;z-index:1;
+  animation:popIn .4s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn{from{transform:scale(.92) translateY(16px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+
+.logo-wrap{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px}
+.logo-icon{width:46px;height:46px;background:var(--primary);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.logo-text{font-family:'Baloo 2',cursive;font-size:26px;font-weight:800;color:var(--primary)}
+.logo-text span{color:var(--accent)}
+
+.auth-sub{text-align:center;color:var(--text2);font-weight:600;font-size:14px;margin-bottom:28px}
+
+/* TABS */
+.tabs{display:flex;background:var(--bg);border-radius:14px;padding:4px;margin-bottom:24px}
+.tab{flex:1;text-align:center;padding:10px;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;color:var(--text2);transition:all .2s;border:none;background:none;font-family:'Nunito',sans-serif}
+.tab.active{background:#fff;color:var(--primary);box-shadow:0 2px 8px rgba(79,110,247,.15)}
+
+/* FORM */
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:13px;font-weight:700;color:var(--text2);margin-bottom:6px}
+.input-wrap{position:relative;display:flex;align-items:center}
+.input-wrap .icon{position:absolute;left:14px;font-size:16px;opacity:.5}
+.form-input{
+  width:100%;padding:12px 14px 12px 40px;border:2px solid #E0E5FF;border-radius:12px;
+  font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;color:var(--text);
+  outline:none;transition:border-color .2s;
+}
+.form-input:focus{border-color:var(--primary)}
+.toggle-pass{position:absolute;right:12px;background:none;border:none;cursor:pointer;font-size:15px;opacity:.5}
+.toggle-pass:hover{opacity:1}
+
+.err-msg{
+  background:#FFE8E8;color:var(--accent);font-size:12px;font-weight:700;
+  padding:8px 12px;border-radius:8px;margin-bottom:14px;display:none;
+}
+.err-msg.show{display:block}
+
+.submit-btn{
+  width:100%;background:var(--primary);color:#fff;border:none;border-radius:12px;
+  padding:13px;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;
+  cursor:pointer;transition:all .2s;box-shadow:0 4px 12px rgba(79,110,247,.3);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.submit-btn:hover{background:var(--primary-dark);transform:translateY(-1px)}
+
+.divider{display:flex;align-items:center;gap:10px;margin:20px 0;color:#ccc;font-size:12px;font-weight:700}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:#EEF1FF}
+
+.guest-btn{
+  width:100%;background:var(--bg);color:var(--primary);border:2px solid #E0E5FF;border-radius:12px;
+  padding:11px;font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;
+  cursor:pointer;transition:all .2s;
+}
+.guest-btn:hover{background:#EEF1FF;border-color:var(--primary)}
+
+.remember-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;font-size:13px;font-weight:600;color:var(--text2)}
+.remember-row label{display:flex;align-items:center;gap:6px;cursor:pointer}
+.remember-row input{accent-color:var(--primary);width:15px;height:15px;cursor:pointer}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;padding:12px 20px;border-radius:12px;font-weight:700;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);z-index:1000}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:var(--accent3)}
+
+@media(max-width:480px){ .auth-box{padding:28px 22px} }
+</style>
+</head>
+<body>
+
+<div class="auth-box">
+  <div class="logo-wrap">
+    <div class="logo-icon">🧠</div>
+    <div class="logo-text">Flash<span>Eng</span></div>
+  </div>
+  <p class="auth-sub">Học từ vựng tiếng Anh mỗi ngày 🚀</p>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" id="tabLogin"    onclick="switchTab('login')">Đăng nhập</button>
+    <button class="tab"        id="tabRegister" onclick="switchTab('register')">Đăng ký</button>
+  </div>
+
+  <div class="err-msg" id="errMsg"></div>
+
+  <!-- LOGIN FORM -->
+  <form id="loginForm" onsubmit="event.preventDefault();doLogin()">
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <div class="input-wrap">
+        <span class="icon">📧</span>
+        <input class="form-input" type="email" id="loginEmail" placeholder="ban@email.com" required/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Mật khẩu</label>
+      <div class="input-wrap">
+        <span class="icon">🔒</span>
+        <input class="form-input" type="password" id="loginPass" placeholder="••••••••" required/>
+        <button type="button" class="toggle-pass" onclick="togglePass('loginPass',this)">👁️</button>
+      </div>
+    </div>
+    <div class="remember-row">
+      <label><input type="checkbox" id="rememberMe" checked/> Ghi nhớ đăng nhập</label>
+    </div>
+    <button class="submit-btn" type="submit">🔓 Đăng nhập</button>
+  </form>
+
+  <!-- REGISTER FORM -->
+  <form id="registerForm" style="display:none" onsubmit="event.preventDefault();doRegister()">
+    <div class="form-group">
+      <label class="form-label">Tên hiển thị</label>
+      <div class="input-wrap">
+        <span class="icon">👤</span>
+        <input class="form-input" type="text" id="regName" placeholder="Nguyễn Văn A" required/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <div class="input-wrap">
+        <span class="icon">📧</span>
+        <input class="form-input" type="email" id="regEmail" placeholder="ban@email.com" required/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Mật khẩu</label>
+      <div class="input-wrap">
+        <span class="icon">🔒</span>
+        <input class="form-input" type="password" id="regPass" placeholder="Tối thiểu 4 ký tự" required minlength="4"/>
+        <button type="button" class="toggle-pass" onclick="togglePass('regPass',this)">👁️</button>
+      </div>
+    </div>
+    <button class="submit-btn" type="submit">✨ Tạo tài khoản</button>
+  </form>
+
+  <div class="divider">hoặc</div>
+  <button class="guest-btn" onclick="continueAsGuest()">👋 Dùng thử không cần đăng ký</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// NOTE: Đây là hệ thống đăng nhập GIẢ LẬP dùng localStorage.
+// Mật khẩu KHÔNG được mã hóa — chỉ phù hợp cho demo/thuyết trình,
+// KHÔNG dùng cho sản phẩm thực tế có dữ liệu nhạy cảm.
+// ============================================================
+
+function switchTab(tab) {
+  document.getElementById('tabLogin').classList.toggle('active', tab==='login');
+  document.getElementById('tabRegister').classList.toggle('active', tab==='register');
+  document.getElementById('loginForm').style.display    = tab==='login' ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = tab==='register' ? 'block' : 'none';
+  hideError();
+}
+
+function togglePass(id, btn) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? '👁️' : '🙈';
+}
+
+function showError(msg) {
+  const el = document.getElementById('errMsg');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideError() { document.getElementById('errMsg').classList.remove('show'); }
+
+// ============================================================
+// REGISTER
+// ============================================================
+function doRegister() {
+  hideError();
+  const name  = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
+  const pass  = document.getElementById('regPass').value;
+
+  if (pass.length < 4) { showError('Mật khẩu phải có ít nhất 4 ký tự.'); return; }
+
+  const users = JSON.parse(localStorage.getItem('fe_users') || '[]');
+  if (users.find(u => u.email === email)) {
+    showError('Email này đã được đăng ký. Vui lòng đăng nhập.');
+    return;
+  }
+
+  users.push({ name, email, pass, avatar: '🦊', joinedAt: new Date().toISOString() });
+  localStorage.setItem('fe_users', JSON.stringify(users));
+
+  loginSession(email, name);
+  showToast('🎉 Tạo tài khoản thành công!', 'success');
+  setTimeout(() => window.location.href = 'index.html', 800);
+}
+
+// ============================================================
+// LOGIN
+// ============================================================
+function doLogin() {
+  hideError();
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass  = document.getElementById('loginPass').value;
+
+  const users = JSON.parse(localStorage.getItem('fe_users') || '[]');
+  const user  = users.find(u => u.email === email && u.pass === pass);
+
+  if (!user) {
+    showError('Email hoặc mật khẩu không đúng.');
+    return;
+  }
+
+  const remember = document.getElementById('rememberMe').checked;
+  loginSession(email, user.name, remember);
+  showToast(`👋 Chào mừng trở lại, ${user.name}!`, 'success');
+  setTimeout(() => window.location.href = 'index.html', 700);
+}
+
+// ============================================================
+// GUEST MODE
+// ============================================================
+function continueAsGuest() {
+  loginSession('guest@flasheng.app', 'Khách', false);
+  // Đảm bảo có user record để các trang khác hoạt động bình thường
+  const users = JSON.parse(localStorage.getItem('fe_users') || '[]');
+  if (!users.find(u => u.email === 'guest@flasheng.app')) {
+    users.push({ name:'Khách', email:'guest@flasheng.app', pass:'', avatar:'👋', joinedAt: new Date().toISOString() });
+    localStorage.setItem('fe_users', JSON.stringify(users));
+  }
+  showToast('👋 Đang vào với chế độ Khách...', 'success');
+  setTimeout(() => window.location.href = 'index.html', 600);
+}
+
+// ============================================================
+// SESSION HELPER
+// ============================================================
+function loginSession(email, name, remember = true) {
+  const session = { email, name, loggedAt: Date.now() };
+  localStorage.setItem('fe_current_user', JSON.stringify(session));
+  localStorage.setItem('fe_username', name);
+  if (!localStorage.getItem('fe_join')) localStorage.setItem('fe_join', new Date().toISOString());
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' '+type : '');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = 'toast', 2500);
+}
+
+// ============================================================
+// AUTO REDIRECT IF ALREADY LOGGED IN
+// ============================================================
+(function() {
+  const session = JSON.parse(localStorage.getItem('fe_current_user') || 'null');
+  if (session) {
+    // Đã đăng nhập rồi -> về trang chủ luôn
+    window.location.href = 'index.html';
+  }
+})();
+</script>
+
+<script src="audio_map.js"></script>
+<script>
+window.playWordAudio=function(word){
+ try{
+  const k=(word||'').toString().trim().toLowerCase();
+  if(window.AUDIO_MAP && AUDIO_MAP[k]){
+    const a=new Audio(AUDIO_MAP[k]); a.play(); return true;
+  }
+ }catch(e){}
+ return false;
+};
+</script>
+</body>
+</html>
